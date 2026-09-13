@@ -1,0 +1,50 @@
+[
+  {
+    "id": "lead_1789287257670",
+    "name": "Goal",
+    "email": "goal@outlook.com",
+    "targetUrl": "youtube.com",
+    "subscribeAlerts": true,
+    "createdAt": "2026-09-13T08:14:17.670Z"
+  },
+  {
+    "id": "lead_1789287235521",
+    "name": "Goal",
+    "email": "goal@outlook.com",
+    "targetUrl": "alok.com",
+    "subscribeAlerts": true,
+    "createdAt": "2026-09-13T08:13:55.522Z"
+  },
+  {
+    "id": "lead_1789286996265",
+    "name": "Rahul Sharma",
+    "email": "rahul.test@gmail.com",
+    "targetUrl": "flipkart.com",
+    "subscribeAlerts": true,
+    "createdAt": "2026-09-13T08:09:56.270Z"
+  },
+  {
+    "id": "lead_1789286544833",
+    "name": "Goal",
+    "email": "goal@outlook.com",
+    "targetUrl": "alokkportfolio.vercel.app",
+    "subscribeAlerts": true,
+    "createdAt": "2026-09-13T08:02:24.834Z"
+  },
+  {
+    "id": "lead_1789286282571",
+    "name": "John Doe",
+    "email": "john@gmail.com",
+    "targetUrl": "mywebsite.com",
+    "subscribeAlerts": true,
+    "createdAt": "2026-09-13T07:58:02.571Z"
+  },
+  {
+    "id": "lead_1789285731154",
+    "name": "Alok",
+    "email": "alok@gmail.com",
+    "targetUrl": "stripe.com",
+    "subscribeAlerts": true,
+    "createdAt": "2026-09-13T07:48:51.154Z"
+  }
+]
