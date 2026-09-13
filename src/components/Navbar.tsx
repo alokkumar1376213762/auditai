@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { Zap, CheckCircle2, Key, Terminal } from "lucide-react";
+import Link from "next/link";
+import { Zap, CheckCircle2, Key, Terminal, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 interface NavbarProps {
@@ -15,7 +15,7 @@ export function Navbar({ onOpenKeyModal, hasApiKey, selectedModel }: NavbarProps
     <header className="sticky top-0 z-40 w-full h-[56px] border-b border-[#23252a] bg-[#010102]/90 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
         {/* Brand Logo */}
-        <div className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5">
           <div className="w-6 h-6 rounded-[6px] bg-[#5e6ad2] flex items-center justify-center text-white font-bold text-xs shadow-sm">
             <span className="font-mono">▲</span>
           </div>
@@ -28,7 +28,7 @@ export function Navbar({ onOpenKeyModal, hasApiKey, selectedModel }: NavbarProps
               Engine
             </span>
           </div>
-        </div>
+        </Link>
 
         {/* Center: Groq LPU Engine pill */}
         <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-[6px] bg-[#0f1011] border border-[#23252a] text-xs text-[#8a8f98]">
@@ -42,6 +42,15 @@ export function Navbar({ onOpenKeyModal, hasApiKey, selectedModel }: NavbarProps
 
         {/* Right Actions */}
         <div className="flex items-center gap-2.5">
+          <Link
+            href="/leads"
+            className="px-2.5 py-1 rounded-[6px] bg-[#0f1011] hover:bg-[#141516] border border-[#23252a] hover:border-[#34343a] text-xs text-[#8a8f98] hover:text-[#f7f8f8] transition flex items-center gap-1.5"
+            title="View Captured Leads"
+          >
+            <Users className="w-3.5 h-3.5 text-[#5e6ad2]" />
+            <span className="hidden sm:inline">Leads CRM</span>
+          </Link>
+
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] bg-[#141516] border border-[#23252a] text-xs font-mono text-[#27a644]">
             <span className="w-1.5 h-1.5 rounded-full bg-[#27a644] animate-pulse" />
             <span className="hidden sm:inline">Groq Connected</span>
