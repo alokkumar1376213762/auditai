@@ -44,19 +44,22 @@ export async function POST(req: NextRequest) {
 
     // 2. Dispatch email notification to owner Gmail (alokkumar13762@gmail.com)
     const ownerEmail = process.env.OWNER_GMAIL || "alokkumar13762@gmail.com";
-    const gmailUser = process.env.GMAIL_USER || ownerEmail;
-    const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
+    const gmailUser = process.env.GMAIL_USER || "alokkumar13762@gmail.com";
+    const rawPassword = process.env.GMAIL_APP_PASSWORD || "zjwu aagj vttx zinc";
+    const cleanPassword = rawPassword.replace(/\s+/g, "");
 
     let emailSent = false;
     let emailStatus = "saved_locally";
 
-    if (gmailUser && gmailAppPassword) {
+    if (gmailUser && cleanPassword) {
       try {
         const transporter = nodemailer.createTransport({
-          service: "gmail",
+          host: "smtp.gmail.com",
+          port: 465,
+          secure: true,
           auth: {
             user: gmailUser,
-            pass: gmailAppPassword,
+            pass: cleanPassword,
           },
         });
 
@@ -103,13 +106,16 @@ export async function POST(req: NextRequest) {
         await transporter.sendMail({
           from: `"AuditAI Alerts" <${gmailUser}>`,
           to: ownerEmail,
-          subject: `🚨 New Website Lead: ${leadEntry.name} (${leadEntry.targetUrl})`,
+          replyTo: leadEntry.email,
+          priority: "high",
+          subject: `🚨 [AUDITAI LEAD] ${leadEntry.name} (${leadEntry.targetUrl})`,
+          text: `New Lead on AuditAI!\n\nName: ${leadEntry.name}\nEmail: ${leadEntry.email}\nTarget Website: ${leadEntry.targetUrl}\nAlerts Subscribed: ${leadEntry.subscribeAlerts ? "Yes" : "No"}\nTime: ${new Date().toLocaleString()}\n\nReply directly to this email to contact ${leadEntry.name}.`,
           html: mailHtml,
         });
 
         emailSent = true;
         emailStatus = "delivered_to_owner_gmail";
-        console.log(`[Email Dispatched] Lead details sent to ${ownerEmail}`);
+        console.log(`[Email Dispatched] Lead details successfully delivered to ${ownerEmail}`);
       } catch (mailErr: any) {
         console.error("[Email Error] Failed to send email via Gmail SMTP:", mailErr.message);
         emailStatus = `smtp_error: ${mailErr.message}`;
