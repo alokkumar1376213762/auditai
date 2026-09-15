@@ -72,7 +72,7 @@ export function LeadCaptureModal({
         JSON.stringify({ name: name.trim(), email: email.trim(), subscribeAlerts })
       );
 
-      // Send lead to server
+      // Send lead directly to server & owner Gmail
       await fetch("/api/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -81,6 +81,7 @@ export function LeadCaptureModal({
           email: email.trim(),
           targetUrl,
           subscribeAlerts,
+          isAnonymous: false,
         }),
       });
     } catch (err) {
@@ -93,6 +94,21 @@ export function LeadCaptureModal({
 
   const handleSkip = () => {
     soundManager.playPop();
+    // Dispatch anonymous audit notice to owner Gmail in background
+    try {
+      fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim() || "Anonymous Visitor",
+          email: email.trim() || "anonymous@auditai.com",
+          targetUrl,
+          subscribeAlerts: false,
+          isAnonymous: true,
+        }),
+      }).catch(() => {});
+    } catch (e) {}
+
     onSubmit({ name: name.trim() || "Anonymous", email: email.trim(), subscribeAlerts: false });
   };
 
@@ -219,10 +235,16 @@ export function LeadCaptureModal({
           </div>
         </form>
 
-        {/* Privacy Note */}
-        <div className="mt-4 pt-3 border-t border-[#1e2024] flex items-center justify-center gap-1.5 text-[10px] text-[#62666d]">
-          <ShieldCheck className="w-3 h-3 text-[#27a644]" />
-          <span>Zero spam guarantee • Your data is private & never sold</span>
+        {/* Privacy & Direct Delivery Status Note */}
+        <div className="mt-4 pt-3 border-t border-[#1e2024] flex items-center justify-between text-[10px] text-[#62666d]">
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck className="w-3 h-3 text-[#27a644]" />
+            <span>Zero spam • Private</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[#8a8f98] font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#27a644] animate-pulse" />
+            <span>Direct Gmail Route Active</span>
+          </div>
         </div>
       </div>
     </div>

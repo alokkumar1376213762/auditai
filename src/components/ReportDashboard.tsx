@@ -6,6 +6,7 @@ import {
   Sparkles,
   Printer,
   Share2,
+  Mail,
   CheckCircle2,
   AlertTriangle,
   Clock,
@@ -62,6 +63,8 @@ export function ReportDashboard({ report, onReset }: ReportDashboardProps) {
   const [showSnippetIds, setShowSnippetIds] = useState<Record<string, boolean>>({});
   const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailStatusMessage, setEmailStatusMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const onScroll = () => {
@@ -175,6 +178,40 @@ ${report.actionItems
     a.download = `audit-report-${report.url.replace(/https?:\/\//, "").replace(/[^a-zA-Z0-9]/g, "-")}.md`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleSendToGmail = async () => {
+    setIsSendingEmail(true);
+    setEmailStatusMessage(null);
+    soundManager.playPop();
+
+    try {
+      const res = await fetch("/api/send-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ report }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to deliver report to Gmail.");
+      }
+      setEmailStatusMessage(`✓ Full report delivered directly to ${data.deliveredTo}!`);
+      soundManager.playSuccess();
+      try {
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.3 },
+          colors: ["#5e6ad2", "#27a644", "#38bdf8"],
+        });
+      } catch (e) {}
+      setTimeout(() => setEmailStatusMessage(null), 5000);
+    } catch (err: any) {
+      setEmailStatusMessage(err.message || "Failed to send");
+      setTimeout(() => setEmailStatusMessage(null), 4000);
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   const filteredActions = report.actionItems.filter((item) => {
@@ -390,12 +427,40 @@ ${report.actionItems
             .MD
           </Button>
 
-          <Button variant="primary" size="sm" onClick={handlePrint} className="text-xs">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleSendToGmail}
+            disabled={isSendingEmail}
+            className="text-xs bg-[#5e6ad2] hover:bg-[#4d5ac4] text-white shadow-sm"
+            title="Email complete report directly to your Gmail"
+          >
+            <Mail className={`w-3 h-3 mr-1 ${isSendingEmail ? "animate-spin" : ""}`} />
+            {isSendingEmail ? "Sending..." : "Email to Gmail"}
+          </Button>
+
+          <Button variant="secondary" size="sm" onClick={handlePrint} className="text-xs">
             <Printer className="w-3 h-3 mr-1" />
             Export
           </Button>
         </div>
       </div>
+
+      {/* Email Delivery Notification Banner */}
+      {emailStatusMessage && (
+        <div className="mt-4 p-3 rounded-[8px] bg-[#27a644]/15 border border-[#27a644]/40 text-[#34d399] text-xs flex items-center justify-between animate-in fade-in duration-200">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#27a644]" />
+            <span>{emailStatusMessage}</span>
+          </div>
+          <button
+            onClick={() => setEmailStatusMessage(null)}
+            className="text-[11px] text-[#8a8f98] hover:text-white transition"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Dynamic Interactive Fix Simulator Banner */}
       {pointsGained > 0 && (
