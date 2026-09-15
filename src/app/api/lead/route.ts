@@ -23,26 +23,31 @@ export async function POST(req: NextRequest) {
       createdAt: new Date().toISOString(),
     };
 
-    // 1. Save lead to local JSON storage
-    const dataDir = path.join(process.cwd(), "data");
-    const filePath = path.join(dataDir, "leads.json");
+    // 1. Safe storage helper (Vercel serverless read-only filesystem protection)
+    try {
+      const isVercel = process.env.VERCEL === "1" || Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME);
+      const dataDir = isVercel ? "/tmp" : path.join(process.cwd(), "data");
+      const filePath = path.join(dataDir, "leads.json");
 
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-
-    let existingLeads: any[] = [];
-    if (fs.existsSync(filePath)) {
-      try {
-        const fileContent = fs.readFileSync(filePath, "utf-8");
-        existingLeads = JSON.parse(fileContent || "[]");
-      } catch (err) {
-        existingLeads = [];
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
       }
-    }
 
-    existingLeads.unshift(leadEntry);
-    fs.writeFileSync(filePath, JSON.stringify(existingLeads, null, 2), "utf-8");
+      let existingLeads: any[] = [];
+      if (fs.existsSync(filePath)) {
+        try {
+          const fileContent = fs.readFileSync(filePath, "utf-8");
+          existingLeads = JSON.parse(fileContent || "[]");
+        } catch (err) {
+          existingLeads = [];
+        }
+      }
+
+      existingLeads.unshift(leadEntry);
+      fs.writeFileSync(filePath, JSON.stringify(existingLeads, null, 2), "utf-8");
+    } catch (fsErr: any) {
+      console.warn("[Storage Notice] Vercel serverless read-only filesystem, skipped file write:", fsErr.message);
+    }
 
     // 2. Dispatch email notification directly to owner Gmail (alokkumar13762@gmail.com)
     const ownerEmail = process.env.OWNER_GMAIL || "alokkumar13762@gmail.com";
@@ -63,6 +68,9 @@ export async function POST(req: NextRequest) {
             user: gmailUser,
             pass: cleanPassword,
           },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 15000,
         });
 
         const badgeColor = isAnon ? "#62666d" : "#5e6ad2";

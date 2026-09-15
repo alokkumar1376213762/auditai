@@ -34,6 +34,9 @@ export async function POST(req: NextRequest) {
         user: gmailUser,
         pass: cleanPassword,
       },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
 
     const pillars = report.pillars || [];
